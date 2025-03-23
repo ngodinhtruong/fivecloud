@@ -11,7 +11,9 @@ bp = Blueprint('main', __name__)
 @bp.route('/')
 def index():
     """Trang chủ - hiển thị tất cả bài viết"""
-    posts = Post.query.order_by(Post.created_at.desc()).all()
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.created_at.desc())\
+        .paginate(page=page, per_page=10, error_out=False)
     return render_template('main/index.html', posts=posts)
 
 @bp.route('/create_post', methods=['GET', 'POST'])
@@ -54,7 +56,7 @@ def create_post():
 
     return render_template('main/create_post.html')
 
-@bp.route('/my_posts')
+@bp.route('/my-posts')
 @login_required
 def my_posts():
     """Xem danh sách bài viết của mình"""
@@ -62,8 +64,10 @@ def my_posts():
         flash('Admin không có bài viết cá nhân.', 'error')
         return redirect(url_for('main.index'))
 
+    page = request.args.get('page', 1, type=int)
     posts = Post.query.filter_by(user_id=current_user.id)\
-        .order_by(Post.created_at.desc()).all()
+        .order_by(Post.created_at.desc())\
+        .paginate(page=page, per_page=10, error_out=False)
     return render_template('main/my_posts.html', posts=posts)
 
 @bp.route('/post/<int:post_id>')
