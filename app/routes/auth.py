@@ -1,0 +1,146 @@
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask_login import login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from app.models.user import User
+from app import db
+from datetime import datetime
+from werkzeug.utils import secure_filename
+import os
+from app.utils.pexels import get_random_avatar
+
+bp = Blueprint('auth', __name__)
+
+@bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+        
+    if request.method == 'POST':
+        login_id = request.form.get('login_id')  # Có thể là username hoặc email
+        password = request.form.get('password')
+        remember = request.form.get('remember', False)
+        
+        # Tìm user theo username hoặc email
+        user = User.query.filter(
+            (User.username == login_id) | (User.email == login_id)
+        ).first()
+        
+        if user and check_password_hash(user.password_hash, password):
+            if not user.is_active:
+                flash('Tài khoản của bạn đã bị vô hiệu hóa.', 'error')
+                return redirect(url_for('auth.login'))
+                
+            login_user(user, remember=remember)
+            user.last_login = datetime.utcnow()
+            db.session.commit()
+            
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('main.index'))
+        else:
+            flash('Tên đăng nhập/email hoặc mật khẩu không đúng.', 'error')
+    
+    return render_template('auth/login.html')
+
+@bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+        
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        full_name = request.form.get('full_name')
+        phone = request.form.get('phone')
+        date_of_birth = request.form.get('date_of_birth')
+        gender = request.form.get('gender')
+        bio = request.form.get('bio')
+        
+        # Kiểm tra mật khẩu xác nhận
+        if password != confirm_password:
+            flash('Mật khẩu xác nhận không khớp.', 'error')
+            return redirect(url_for('auth.register'))
+            
+        # Kiểm tra username đã tồn tại
+        if User.query.filter_by(username=username).first():
+            flash('Tên đăng nhập đã được sử dụng.', 'error')
+            return redirect(url_for('auth.register'))
+            
+        # Kiểm tra email đã tồn tại
+        if User.query.filter_by(email=email).first():
+            flash('Email đã được sử dụng.', 'error')
+            return redirect(url_for('auth.register'))
+        
+        # Tạo user mới
+        new_user = User(
+            username=username,
+            email=email,
+            password_hash=generate_password_hash(password),
+            full_name=full_name,
+            phone=phone,
+            date_of_birth=datetime.strptime(date_of_birth, '%Y-%m-%d').date() if date_of_birth else None,
+            gender=gender,
+            bio=bio
+        )
+        
+        # Lấy avatar ngẫu nhiên khi tạo user
+        new_user.random_avatar_url = get_random_avatar()
+        new_user.avatar_updated_at = datetime.utcnow()
+        
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Đăng ký thành công! Vui lòng đăng nhập.', 'success')
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Có lỗi xảy ra. Vui lòng thử lại.', 'error')
+            
+    return render_template('auth/register.html')
+
+@bp.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('main.index'))
+
+@bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        # Cập nhật thông tin profile
+        current_user.full_name = request.form.get('full_name')
+        current_user.bio = request.form.get('bio')
+        current_user.phone = request.form.get('phone')
+        
+        # Xử lý ngày sinh
+        date_of_birth = request.form.get('date_of_birth')
+        if date_of_birth:
+            current_user.date_of_birth = datetime.strptime(date_of_birth, '%Y-%m-%d')
+        
+        current_user.gender = request.form.get('gender')
+
+        try:
+            db.session.commit()
+            flash('Cập nhật thông tin thành công!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash('Có lỗi xảy ra khi cập nhật thông tin.', 'error')
+            
+    return render_template('auth/profile.html')
+
+@bp.route('/refresh-avatar', methods=['POST'])
+@login_required
+def refresh_avatar():
+    """Làm mới avatar ngẫu nhiên"""
+    try:
+        new_avatar = get_random_avatar()
+        current_user.random_avatar_url = new_avatar
+        db.session.commit()
+        flash('Đã cập nhật avatar mới!', 'success')
+    except Exception as e:
+        print(f"Error refreshing avatar: {str(e)}")
+        flash('Không thể cập nhật avatar. Vui lòng thử lại.', 'error')
+    
+    return redirect(url_for('auth.profile')) 
