@@ -129,57 +129,57 @@ Hệ thống có cơ chế **quản trị viên (admin)** để giám sát nội
 
 ## **7. Cây thư mục:**
 
-ds-reading-platform/
-├── .env                    # Chứa biến môi trường
-├── .gitignore             # Cấu hình git ignore
-├── requirements.txt       # Danh sách package cần thiết
-├── run.py                # File chạy ứng dụng
-├── config.py             # Cấu hình ứng dụng
-│
-├── app/
-│   ├── __init__.py       # Khởi tạo ứng dụng Flask
-│   │
-│   ├── models/           # Các model database
-│   │   ├── __init__.py
-│   │   ├── user.py      # Model User
-│   │   ├── post.py      # Model Post
-│   │   ├── comment.py   # Model Comment
-│   │   └── like.py      # Model Like
-│   │
-│   ├── routes/          # Các route của ứng dụng
-│   │   ├── __init__.py
-│   │   ├── auth.py      # Route xác thực
-│   │   ├── main.py      # Route chính
-│   │   └── admin.py     # Route admin
-│   │
-│   ├── templates/       # Templates HTML
-│   │   ├── base.html    # Template cơ sở
-│   │   ├── auth/
-│   │   │   ├── login.html
-│   │   │   └── register.html
-│   │   ├── main/
-│   │   │   ├── index.html
-│   │   │   ├── create_post.html
-│   │   │   └── view_post.html
-│   │   └── admin/
-│   │       ├── dashboard.html
-│   │       ├── users.html
-│   │       └── posts.html
-│   │
-│   ├── static/         # File tĩnh
-│   │   ├── css/
-│   │   │   └── main.css
-│   │   ├── js/
-│   │   │   └── main.js
-│   │   └── img/
-│   │
-│   └── utils/         # Các hàm tiện ích
-│       ├── __init__.py
-│       └── decorators.py
-│
-├── tests/            # Unit tests
-│   ├── __init__.py
-│   ├── test_auth.py
-│   └── test_posts.py
-│
+ds-reading-platform/<br>
+├── .env                    # Chứa biến môi trường<br>
+├── .gitignore             # Cấu hình git ignore<br>
+├── requirements.txt       # Danh sách package cần thiết<br>
+├── run.py                # File chạy ứng dụng<br>
+├── config.py             # Cấu hình ứng dụng<br>
+│<br>
+├── app/<br>
+│   ├── __init__.py       # Khởi tạo ứng dụng Flask<br>
+│   │<br>
+│   ├── models/           # Các model database<br>
+│   │   ├── __init__.py<br>
+│   │   ├── user.py      # Model User<br>
+│   │   ├── post.py      # Model Post<br>
+│   │   ├── comment.py   # Model Comment<br>
+│   │   └── like.py      # Model Like<br>
+│   │<br>
+│   ├── routes/          # Các route của ứng dụng<br>
+│   │   ├── __init__.py<br>
+│   │   ├── auth.py      # Route xác thực<br>
+│   │   ├── main.py      # Route chính<br>
+│   │   └── admin.py     # Route admin<br>
+│   │<br>
+│   ├── templates/       # Templates HTML<br>
+│   │   ├── base.html    # Template cơ sở<br>
+│   │   ├── auth/<br>
+│   │   │   ├── login.html<br>
+│   │   │   └── register.html<br>
+│   │   ├── main/<br>
+│   │   │   ├── index.html<br>
+│   │   │   ├── create_post.html<br>
+│   │   │   └── view_post.html<br>
+│   │   └── admin/<br>
+│   │       ├── dashboard.html<br>
+│   │       ├── users.html<br>
+│   │       └── posts.html<br>
+│   │<br>
+│   ├── static/         # File tĩnh<br>
+│   │   ├── css/<br>
+│   │   │   └── main.css<br>
+│   │   ├── js/<br>
+│   │   │   └── main.js<br>
+│   │   └── img/<br>
+│   │<br>
+│   └── utils/         # Các hàm tiện ích<br>
+│       ├── __init__.py<br>
+│       └── decorators.py<br>
+│<br>
+├── tests/            # Unit tests<br>
+│   ├── __init__.py<br>
+│   ├── test_auth.py<br>
+│   └── test_posts.py<br>
+│<br>
 └── venv/            # Môi trường ảo Python (sẽ được tạo sau)
