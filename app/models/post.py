@@ -9,6 +9,7 @@ class Post(db.Model):
     content = db.Column(db.Text, nullable=False)
     source_link = db.Column(db.String(500))
     source_content = db.Column(db.Text)
+    visibility = db.Column(db.Integer, default=0) #Định__mmber # 0: Công khai, 1: Hạn chế 
     
     # Metadata
     status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
@@ -30,3 +31,7 @@ class Post(db.Model):
     
     def set_tags_list(self, tags_list):
         self.tags = ','.join(tags_list) 
+    def is_public(self):
+        return self.visibility == 0
+    def is_restricted(self):
+        return self.visibility == 1

@@ -12,10 +12,25 @@ bp = Blueprint('main', __name__)
 def index():
     """Trang chủ - hiển thị tất cả bài viết"""
     page = request.args.get('page', 1, type=int)
-    posts = Post.query.order_by(Post.created_at.desc())\
-        .paginate(page=page, per_page=10, error_out=False)
+    
+    # Truy vấn cơ bản
+    query = Post.query.order_by(Post.created_at.desc())
+    
+    # Nếu không phải admin
+    if current_user.is_authenticated and not current_user.is_initial_admin:
+        # Người dùng thường: Hiển thị bài công khai hoặc bài của chính họ
+        query = query.filter(
+            db.or_(
+                Post.visibility == 0,  # Công khai
+                db.and_(Post.visibility == 1, Post.user_id == current_user.id)  # Chỉ mình tôi
+            )
+        )
+    elif not current_user.is_authenticated:
+        query = query.filter(Post.visibility == 0)
+    
+    # Phân trang
+    posts = query.paginate(page=page, per_page=10, error_out=False)
     return render_template('main/index.html', posts=posts)
-
 @bp.route('/create_post', methods=['GET', 'POST'])
 @login_required
 def create_post():
@@ -30,7 +45,7 @@ def create_post():
         source_link = request.form.get('source_link')
         source_content = request.form.get('source_content')
         tags = request.form.get('tags')
-
+        visibility = request.form.get('visibility')
         if not title or not content:
             flash('Tiêu đề và nội dung không được để trống.', 'error')
             return redirect(url_for('main.create_post'))
@@ -42,7 +57,8 @@ def create_post():
             source_content=source_content,
             tags=tags,
             user_id=current_user.id,
-            status='approved'  # Bài viết được đăng trực tiếp
+            status='approved',  # Bài viết được đăng trực tiếp
+            visibility=visibility
         )
 
         try:
@@ -53,8 +69,8 @@ def create_post():
         except Exception as e:
             db.session.rollback()
             flash('Có lỗi xảy ra khi tạo bài viết.', 'error')
-
-    return render_template('main/create_post.html')
+    visibility = request.args.get('visibility', 0)
+    return render_template('main/create_post.html', visibility=visibility)
 
 @bp.route('/my-posts')
 @login_required
@@ -92,6 +108,7 @@ def edit_post(post_id):
         post.source_link = request.form.get('source_link')
         post.source_content = request.form.get('source_content')
         post.tags = request.form.get('tags')
+        post.visibility = request.form.get('visibility')
         post.updated_at = datetime.utcnow()
         
         try:
