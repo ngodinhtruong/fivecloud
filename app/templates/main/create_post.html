@@ -19,7 +19,7 @@
             {% endif %}
         {% endwith %}
 
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-white rounded-xl shadow-lg">
             <form method="POST" action="{{ url_for('main.create_post') }}" class="p-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Nguồn bài viết -->
@@ -72,12 +72,24 @@
                 </div>
 
                 <div class="mt-8 flex justify-end">
-                    <button type="submit"
-                            class="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2.5 rounded-lg text-white font-semibold hover:shadow-lg transition-all duration-300 flex items-center">
-                        <i class="fas fa-paper-plane mr-2"></i>
-                        Đăng bài
+                    <details class="relative inline-block text-left me-8 px-6 py-2.5">
+                      <summary class="inline-flex cursor-pointer w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-gray-300 shadow-xs hover:bg-gray-50 list-none shadow-md">
+                        Công khai
+                        <svg class="-mr-1 size-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                        </svg>
+                      </summary>
+                      <div class="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-md bg-white ring-1 shadow-lg ring-black/5">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Hạn chế</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Bạn bè</a>
+                      </div>
+                    </details>
+                  
+                    <button type="submit" class="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2.5 rounded-lg text-white font-semibold hover:shadow-lg transition-all duration-300 flex items-center">
+                      <i class="fas fa-paper-plane mr-2"></i>
+                      Đăng bài
                     </button>
-                </div>
+                  </div>
             </form>
         </div>
     </div>
