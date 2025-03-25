@@ -108,10 +108,16 @@
                     <div class="my-2 border-t border-gray-200  "></div>
                     <div class="flex ">
                         <div class="w-1/2 hover:bg-[#E5E7EB] hover:text-gray-900 flex items-center justify-center rounded-lg ">
-                            <button name = 'like' type="submit" class="flex items-center justify-center w-full h-full cursor-pointer">
-                                <i class="fa-regular fa-thumbs-up me-2"></i>Thích
+                            <form action="{{url_for('main.like_action',post_id = post.id)}}" method="POST">
+                                <button name = 'like' type="submit" class="flex items-center justify-center w-full h-full cursor-pointer">
 
-                            </button>
+                                    <i class="fa-regular fa-thumbs-up me-2"></i>Thích
+    
+                                </button>
+                                    
+
+                            </form>
+                            
                             
                         </div>
                         

@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
+from app.models.like import Like
 from app.models.post import Post
 from app.models.user import User
 from app.models.comment import Comment
@@ -178,12 +179,10 @@ def saved_posts():
         .order_by(SavedPost.saved_at.desc())\
         .all()
     return render_template('main/saved_posts.html', saved_posts=saved) 
-@bp.route('/comment/<int:post_id>/comment', methods=['POST'])
+@bp.route('/post/<int:post_id>/comment', methods=['POST'])
 @login_required
 def add_comment(post_id):
     post = Post.query.get_or_404(post_id)
-    
-
     if not current_user.is_authenticated:
         flash('Bạn cần đăng nhập để bình luận.', 'warning')
     if request.method == 'POST':  
@@ -206,3 +205,30 @@ def add_comment(post_id):
             flash('Có lỗi xảy ra khi đăng bình luận.', 'error')
     
     return redirect(url_for('main.view_post', post_id=post_id))
+
+
+# chua hoan thanh 
+@bp.route('/post/<int:post_id>/like', methods=['POST'])
+@login_required
+def like_action(post_id):
+    post = Post.query.get_or_404(post_id)
+    like = Like.query.filter_by(user_id = current_user.id, post_id = post_id).first()
+    if like is None:
+        like = Like(
+            user_id=current_user.id,
+            post_id=post.id
+        )
+        try:
+            db.session.add(like)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash('Có lỗi xảy ra khi thích bài viết.', 'error')
+    else:
+        try:
+            db.session.delete(like)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash('Có lỗi xảy ra', 'error')
+    return redirect(url_for('main.index', post_id=post_id))

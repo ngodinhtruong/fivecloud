@@ -22,6 +22,8 @@ class Post(db.Model):
     # Relationships
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     author = db.relationship('User', backref=db.backref('posts', lazy=True))
+    likes = db.relationship('Like', backref='post', lazy='dynamic')
+
     
     def __repr__(self):
         return f'<Post {self.title}>'
