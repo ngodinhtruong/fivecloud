@@ -17,7 +17,7 @@ def index():
     page = request.args.get('page', 1, type=int)
     
     query = Post.query.order_by(Post.created_at.desc())
-    
+    likes = []
     # Nếu không phải admin
     if current_user.is_authenticated and not current_user.is_initial_admin:
         query = query.filter(
@@ -34,6 +34,13 @@ def index():
     # Phân trang
     posts = query.paginate(page=page, per_page=10, error_out=False)
     liked_post_ids = [like.post_id for like in likes] if likes else []
+    total_likes_query = db.session.query(Like.post_id, db.func.count(Like.post_id).label('like_count'))\
+        .group_by(Like.post_id).all()
+    total_likes_dict = {post_id: like_count for post_id, like_count in total_likes_query}
+    
+    # Gắn tổng số lượt thích vào từng post
+    for post in posts.items:
+        post.total_likes = total_likes_dict.get(post.id, 0)  # Mặc định 0 nếu không có lượt thích
     return render_template('main/index.html', posts=posts, likes=liked_post_ids)
 @bp.route('/create_post', methods=['GET', 'POST'])
 @login_required
