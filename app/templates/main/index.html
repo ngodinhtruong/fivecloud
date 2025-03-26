@@ -107,28 +107,27 @@
                     </div>
                     <div class="my-2 border-t border-gray-200  "></div>
                     <div class="flex ">
-                        <div class="w-1/2 hover:bg-[#E5E7EB] hover:text-gray-900 flex items-center justify-center rounded-lg ">
-                            <form action="{{url_for('main.like_action',post_id = post.id)}}" method="POST">
-                                <button name = 'like' type="submit" class="flex items-center justify-center w-full h-full cursor-pointer">
+                        <div
+                            class="w-1/2 hover:bg-[#E5E7EB] hover:text-gray-900 flex items-center justify-center rounded-lg ">
+                            <button onclick="toggle_like({{ post.id }}, this)" name='like'
+                                class="{% if post.id in likes %} text-orange-500 {%else%} {% endif %} flex items-center justify-center w-full h-full cursor-pointer">
+                                    <i class=" {% if post.id in likes %} fas {%else%} far {% endif %} fa-regular fa-thumbs-up me-2 "></i>
+                                Thích
 
-                                    <i class="fa-regular fa-thumbs-up me-2"></i>Thích
-    
-                                </button>
-                                    
+                            </button>
 
-                            </form>
-                            
-                            
                         </div>
-                        
-                        <div class="text-center w-1/2 hover:bg-[#E5E7EB] hover:text-gray-900 flex items-center justify-center rounded-lg">
+
+                        <div
+                            class="text-center w-1/2 hover:bg-[#E5E7EB] hover:text-gray-900 flex items-center justify-center rounded-lg">
                             <form method="GET" action="{{ url_for('main.view_post', post_id=post.id) }}">
-                                <button name = 'comment' type="submit" class="flex items-center justify-center w-full h-full cursor-pointer " >
+                                <button name='comment' type="submit"
+                                    class="flex items-center justify-center w-full h-full cursor-pointer ">
                                     <i class="fa-regular fa-comment  me-2"></i>Bình luận
-    
+
                                 </button>
                             </form>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -174,13 +173,51 @@
                     if (data.status === 'saved') {
                         icon.classList.remove('far');
                         icon.classList.add('fas');
+                        icon.classList.add('text-orange-500');
                         button.classList.add('text-orange-500');
                         button.classList.remove('text-gray-400');
                     } else {
                         icon.classList.remove('fas');
                         icon.classList.add('far');
+                        icon.classList.remove('text-orange-500');
                         button.classList.remove('text-orange-500');
                         button.classList.add('text-gray-400');
+                    }
+
+                    // Show notification
+                    showMessage(data.message, 'success');
+                }
+            })
+            .catch(error => {
+                showMessage('Đã xảy ra lỗi khi lưu bài viết', 'error');
+            });
+    }
+
+    function toggle_like(postId, button) {
+        fetch(`{{ url_for('main.toggle_like', post_id=0) }}`.replace('0', postId), {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update icon
+                    const icon = button.querySelector('i');
+                    if (data.status === 'liked') {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        
+                        button.classList.add('text-orange-500');
+                    } else {
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                        
+                        button.classList.remove('text-orange-500');
+                        
                     }
 
                     // Show notification

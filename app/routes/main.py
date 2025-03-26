@@ -16,24 +16,25 @@ def index():
     """Trang chủ - hiển thị tất cả bài viết"""
     page = request.args.get('page', 1, type=int)
     
-    # Truy vấn cơ bản
     query = Post.query.order_by(Post.created_at.desc())
     
     # Nếu không phải admin
     if current_user.is_authenticated and not current_user.is_initial_admin:
-        # Người dùng thường: Hiển thị bài công khai hoặc bài của chính họ
         query = query.filter(
             db.or_(
                 Post.visibility == 0,  # Công khai
                 db.and_(Post.visibility == 1, Post.user_id == current_user.id)  # Chỉ mình tôi
             )
         )
+        likes = Like.query.filter_by(user_id=current_user.id).all()
+
     elif not current_user.is_authenticated:
         query = query.filter(Post.visibility == 0)
     
     # Phân trang
     posts = query.paginate(page=page, per_page=10, error_out=False)
-    return render_template('main/index.html', posts=posts)
+    liked_post_ids = [like.post_id for like in likes] if likes else []
+    return render_template('main/index.html', posts=posts, likes=liked_post_ids)
 @bp.route('/create_post', methods=['GET', 'POST'])
 @login_required
 def create_post():
@@ -210,7 +211,7 @@ def add_comment(post_id):
 # chua hoan thanh 
 @bp.route('/post/<int:post_id>/like', methods=['POST'])
 @login_required
-def like_action(post_id):
+def toggle_like(post_id):
     post = Post.query.get_or_404(post_id)
     like = Like.query.filter_by(user_id = current_user.id, post_id = post_id).first()
     if like is None:
@@ -221,6 +222,11 @@ def like_action(post_id):
         try:
             db.session.add(like)
             db.session.commit()
+            return jsonify({
+                'success': True,
+                'message': 'Đã thích bài viết',
+                'status': 'liked'
+            })
         except Exception as e:
             db.session.rollback()
             flash('Có lỗi xảy ra khi thích bài viết.', 'error')
@@ -228,7 +234,11 @@ def like_action(post_id):
         try:
             db.session.delete(like)
             db.session.commit()
+            return jsonify({
+                'success': True,
+                'message': 'Đã bỏ thích bài viết',
+                'status': 'unliked'
+            })
         except Exception as e:
             db.session.rollback()
             flash('Có lỗi xảy ra', 'error')
-    return redirect(url_for('main.index', post_id=post_id))

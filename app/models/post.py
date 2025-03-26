@@ -33,7 +33,3 @@ class Post(db.Model):
     
     def set_tags_list(self, tags_list):
         self.tags = ','.join(tags_list) 
-    def is_public(self):
-        return self.visibility == 0
-    def is_restricted(self):
-        return self.visibility == 1
