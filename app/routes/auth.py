@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.user import User
+from app.models.post import Post
 from app import db
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -144,3 +145,35 @@ def refresh_avatar():
         flash('Không thể cập nhật avatar. Vui lòng thử lại.', 'error')
     
     return redirect(url_for('auth.profile')) 
+
+# Chức năng tìm kiếm
+@bp.route('/search', methods=['GET', 'POST'])
+def search_posts():
+    """Tìm kiếm bài đăng theo tiêu đề và hiển thị gợi ý"""
+    query = request.args.get('query', '').strip()  # Lấy query từ thanh tìm kiếm
+    suggestions = []
+    posts = []
+
+    if query:
+        # Tìm kiếm bài đăng theo tiêu đề (không phân biệt hoa thường)
+        posts = Post.query.filter(
+            Post.title.ilike(f'%{query}%'),
+            Post.status == 'approved'  # Chỉ hiển thị bài đăng đã được phê duyệt
+        ).order_by(Post.created_at.desc()).all()
+
+        # Gợi ý tiêu đề bài đăng
+        suggestions = Post.query.filter(
+            Post.title.ilike(f'%{query}%'),
+            Post.status == 'approved'
+        ).order_by(Post.title).limit(5).all()  # Giới hạn 5 gợi ý
+
+    # Nếu không có query, trả về trang tìm kiếm
+    return render_template('auth/search.html', query=query, posts=posts, suggestions=suggestions)
+
+@bp.route('/search/suggestion', methods=['POST'])
+def select_suggestion():
+    """Xử lý khi người dùng chọn một gợi ý"""
+    suggestion = request.form.get('suggestion', '').strip()
+    if suggestion:
+        return redirect(url_for('auth.search_posts', query=suggestion))
+    return redirect(url_for('auth.search_posts'))
