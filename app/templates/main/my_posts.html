@@ -42,6 +42,14 @@
                                     <i class="far fa-clock mr-1"></i>
                                     {{ post.created_at.strftime('%d/%m/%Y %H:%M') }}
                                 </span>
+                                <span class="ml-2 flex items-center">
+                                    {% if post.visibility == 0 %}
+                                    <i class="fa-solid fa-globe"></i>
+                                    {% else %}
+                                    <i class="fa-solid fa-lock"></i>
+                                    {% endif %}
+                                    
+                                </span>
                                 <span class="mx-2">•</span>
                                 <span class="px-2 py-1 rounded-full text-xs font-medium
                                     {% if post.status == 'approved' %}bg-green-100 text-green-800
