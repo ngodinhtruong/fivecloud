@@ -7,8 +7,11 @@ class Config:
     # Cấu hình bảo mật
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'
     
-    # Cấu hình database - sử dụng đường dẫn tuyệt đối
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.abspath("instance/ds_reading.db")}'
+    # Cấu hình database - sử dụng PostgreSQL
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    if not SQLALCHEMY_DATABASE_URI:
+        raise ValueError("No DATABASE_URL set in environment")
+    
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Cấu hình upload
@@ -21,4 +24,4 @@ class Config:
         print("Warning: PEXELS_API_KEY not set in .env file")
     
     # Cache config để lưu avatar URL
-    AVATAR_CACHE_TIMEOUT = 3600  # 1 giờ 
+    AVATAR_CACHE_TIMEOUT = 3600  # 1 giờ
