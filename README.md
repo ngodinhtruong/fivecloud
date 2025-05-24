@@ -213,7 +213,7 @@ Trang web còn hỗ trợ lưu trữ dữ liệu với PostgreSQL và Firebase, 
 1️⃣ **Clone repository**
 
 ```bash
-git clone https://github.com/iuh-application-development/DS-Reading-Sharing-Platform.git
+https://github.com/ngodinhtruong/fivecloud.git
 cd DS-Reading-Sharing-Platform
 ```
 
